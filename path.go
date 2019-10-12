@@ -1,7 +1,8 @@
-package goref
+package gorefer
 
 import (
 	"fmt"
+	"github.com/spectrex02/goref/pkg/parse"
 	"io/ioutil"
 	"strings"
 
@@ -27,7 +28,7 @@ type File struct {
 	Node
 	Name string
 	Path string
-	Info parse.FileInfo
+	Info FileInfo
 	Package string
 }
 

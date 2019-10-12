@@ -1,4 +1,4 @@
-package goref
+package gorefer
 
 import (
 	"fmt"
