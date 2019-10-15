@@ -14,15 +14,15 @@ var Analyzer = &analysis.Analyzer{
 	Doc:		"detect struct or interface, custom type declaration",
 	Run:		run,
 	Requires:	[]*analysis.Analyzer{inspect.Analyzer},
-
 }
 
-func run(pass *analysis.Pass, parser *gorefer.Parser) (interface{}, error) {
+func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.GenDecl)(nil),
 	}
 
+	parser := gorefer.NewParser()
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.GenDecl:

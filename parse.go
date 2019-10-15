@@ -22,6 +22,14 @@ type FileInfo struct {
 	Imports []string
 }
 
+func NewParser() *Parser {
+	return &Parser{
+		FuncId: FuncId{Id: 0},
+		StructId: StructId{Id: 0},
+		InterfaceId: InterfaceId{Id: 0},
+		VarId: VarId{Id: 0},
+	}
+}
 //get interface information from interface type declaration
 func (p *Parser) GetInterfaceInfo(spec ast.Spec, pkg string) *InterfaceInfo {
 	//var list []InterfaceInfo
