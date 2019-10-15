@@ -37,15 +37,18 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		case *ast.FuncDecl:
 			{
 				f := pass.TypesInfo.Defs[n.Name].(*types.Func)
-				fmt.Printf("%v\n", f)
+				t := f.Id()
+				a := f.Type().Underlying()
+				//b := pass.TypesInfo.Implicits[n].String()
+				c := f.FullName()
+				fmt.Printf("detected -> %v, Id -> %s, underlying -> %s\n", f, t, a)
+				fmt.Printf("types --> %v\n", c)
 				funcDecl = append(funcDecl, f)
 			}
 		case *ast.FuncLit:
 			{
 				funcLit = append(funcLit, n)
 			}
-
-
 		}
 	})
 
