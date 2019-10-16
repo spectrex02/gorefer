@@ -1,12 +1,10 @@
-package goref
+package gorefer
 
 import (
 	"fmt"
 	"io/ioutil"
-	"strings"
-
-	//"log"
 	"path/filepath"
+	"strings"
 )
 
 type Node interface {
@@ -27,7 +25,7 @@ type File struct {
 	Node
 	Name string
 	Path string
-	Info parse.FileInfo
+	Info FileInfo
 	Package string
 }
 
@@ -70,13 +68,13 @@ func (root Root) Show() {
 }
 
 func New(path string) Dir {
-	p := parse.New()
-	nodes, packageName := getTree(path, p)
+	//p := New(path)
+	//nodes, packageName := getTree(path, p)
 	root := Dir{
-		Child: nodes,
+		Child: nil,
 		Name: trim(path),
 		Path: path,
-		Package: packageName,
+		Package: "",
 	}
 	root.GivePackageName()
 	return root
@@ -94,7 +92,7 @@ func trim(path string) string {
 }
 
 
-func getTree(path string, p *parse.Parser) ([]Node, string) {
+func getTree(path string, p *Parser) ([]Node, string) {
 	//fmt.Println("now in getTree function. path ->", path)
 	var nodes []Node
 	var name string
@@ -119,16 +117,18 @@ func getTree(path string, p *parse.Parser) ([]Node, string) {
 		//we have to check whether go file or not.
 		if !strings.Contains(file.Name(), ".go") { continue }
 		//fmt.Println("file path ===== ", filepath.Join(path, file.Name()))
-		info := p.GetFileInfo(filepath.Join(path, file.Name()))
+		//info := p.GetFileInfo(filepath.Join(path, file.Name()))
 		f := File{
 			Name: file.Name(),
 			Path: filepath.Join(path, file.Name()),
-			Info: info,
-			Package: info.Package,
+			Info: FileInfo{},
+			//Package: Package,
+			Package:"",
 		}
 		//fmt.Println(f.Name)
 		nodes = append(nodes, f)
-		name = info.Package
+		//name = Package
+		name  = ""
 	}
 	//fmt.Println("length of nodes: ", len(nodes))
 	return nodes, name
