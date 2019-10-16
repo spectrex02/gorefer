@@ -68,13 +68,13 @@ func (root Root) Show() {
 }
 
 func New(path string) Dir {
-	p := New(path)
-	nodes, packageName := getTree(path, p)
+	//p := New(path)
+	//nodes, packageName := getTree(path, p)
 	root := Dir{
-		Child: nodes,
+		Child: nil,
 		Name: trim(path),
 		Path: path,
-		Package: packageName,
+		Package: "",
 	}
 	root.GivePackageName()
 	return root
@@ -117,16 +117,18 @@ func getTree(path string, p *Parser) ([]Node, string) {
 		//we have to check whether go file or not.
 		if !strings.Contains(file.Name(), ".go") { continue }
 		//fmt.Println("file path ===== ", filepath.Join(path, file.Name()))
-		info := p.GetFileInfo(filepath.Join(path, file.Name()))
+		//info := p.GetFileInfo(filepath.Join(path, file.Name()))
 		f := File{
 			Name: file.Name(),
 			Path: filepath.Join(path, file.Name()),
-			Info: info,
-			Package: Package,
+			Info: FileInfo{},
+			//Package: Package,
+			Package:"",
 		}
 		//fmt.Println(f.Name)
 		nodes = append(nodes, f)
-		name = Package
+		//name = Package
+		name  = ""
 	}
 	//fmt.Println("length of nodes: ", len(nodes))
 	return nodes, name

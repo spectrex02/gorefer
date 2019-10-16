@@ -11,5 +11,5 @@ import (
 
 func TestFuncDecl(t *testing.T) {
 	testdata := analysistest.TestData()
-	analysistest.Run(t, testdata, Analyzer, "func_decl_test_file")
+	analysistest.Run(t, testdata, Analyzer, "testfiles")
 }

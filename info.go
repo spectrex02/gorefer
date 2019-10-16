@@ -47,8 +47,14 @@ type VarInfo struct {
 	Type string
 }
 
+type PackageInfo struct {
+	Struct []StructInfo
+	Interface []InterfaceInfo
+	Var []VarInfo
+	Function []FunctionInfo
+}
 
-//struct for get a method or function list called by some function
+//struct for get testfiles method or function list called by some function
 type CalledFunction struct {
 	Info
 	Receiver string
@@ -120,6 +126,7 @@ func (f FunctionInfo) Show() {
 	fmt.Println("Package:", f.Package)
 	fmt.Println("Receiver:", f.Receiver)
 	fmt.Println("Receiver Type:", f.ReceiverType)
+	fmt.Println("Return Type:", f.ReturnType)
 	fmt.Println("Called:", f.Called)
 	fmt.Println("Body:", f.Body)
 	fmt.Printf("\n")
@@ -142,3 +149,9 @@ func (i InterfaceInfo) Show() {
 	fmt.Println("Methods:", i.Methods)
 }
 
+func (v VarInfo) Show() {
+	fmt.Println("-----show var info-----")
+	fmt.Println("Id:", v.Id)
+	fmt.Println("Name:", v.Name)
+	fmt.Println("Type:", v.Type)
+}
