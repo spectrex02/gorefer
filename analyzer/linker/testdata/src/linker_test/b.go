@@ -20,8 +20,16 @@ func (bbb *BBB) hoge() BB {
 	return BB{name:"hogehogehoge"}
 }
 
+func (bb *BB) show() {
+	fmt.Println(bb.name)
+}
+
 func complexType() {
 	NewBBB().hoge()
-	b := NewBBB().hoge().name
+	b := NewBBB().hoge()
 	fmt.Println(b)
+
+	if true {
+		b.show()
+	}
 }

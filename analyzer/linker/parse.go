@@ -6,21 +6,34 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-func parseBody(block *ast.BlockStmt, pass *analysis.Pass) {
-	if len(block.List) == 0 { return }
+func parseBody(block *ast.BlockStmt, pass *analysis.Pass) []Called {
+	if len(block.List) == 0 { return nil }
+	var called []Called
 	for _, stmt := range block.List {
 		switch s := stmt.(type) {
+		case *ast.BlockStmt:
+			called = append(called, parseBody(s, pass)...)
 		case *ast.AssignStmt:
-			{
-				parseAssignStmt(s, pass)
-			}
+				called = append(called, parseAssignStmt(s, pass)...)
 		case *ast.ExprStmt:
-			parseExprStmt(s, pass)
+			called = append(called, parseExprStmt(s, pass))
 		case *ast.RangeStmt:
+			called = append(called, parseRangeStmt(s, pass)...)
 		case *ast.ForStmt:
+			called = append(called, parseForStmt(s, pass)...)
 		case *ast.IfStmt:
+			called = append(called, parseIfStmt(s, pass)...)
+		case *ast.ReturnStmt:
+			called = append(called, parseReturnStmt(s, pass)...)
+		case *ast.GoStmt:
+			called = append(called, parseGoStmt(s, pass)...)
+		case *ast.SwitchStmt:
+			called = append(called, parseSwitchStmt(s, pass)...)
+		case *ast.TypeSwitchStmt:
+			called = append(called, parseTypeSwitchStmt(s, pass)...)
 		}
 	}
+	return called
 }
 
 //parse call expr
@@ -92,8 +105,17 @@ func parseSelectorExpr(expr *ast.SelectorExpr, pass *analysis.Pass) Called {
 				Package: c.Package,
 			}
 		}
-	default:
-		fmt.Printf("&&&&&&&&&&&&&-> %v, %T\n", r, r)
+	case *ast.CallExpr:
+		{
+			c := parseCallExpr(r, pass)
+			return Called{
+				Name:         name,
+				ReturnType:   returnType,
+				Receiver:     c.Name,
+				ReceiverType: c.ReturnType,
+				Package:      c.Package,
+			}
+		}
 	}
 	//NewBBB().hoge() <- reach here
 	return Called{
@@ -108,46 +130,46 @@ func parseSelectorExpr(expr *ast.SelectorExpr, pass *analysis.Pass) Called {
 
 
 //parse expr stmt -> *ast.CallExpr, *ast.SelectorExpr
-func parseExprStmt(stmt *ast.ExprStmt, pass *analysis.Pass) {
+func parseExprStmt(stmt *ast.ExprStmt, pass *analysis.Pass) Called {
 	switch f := stmt.X.(type) {
 	case *ast.CallExpr:
 		{
-			//info := f.Fun
-			//obj := pass.TypesInfo.Types[f]
-			//objType := obj.Type.String()
-			////objValue := obj.Value.String()
-			//fmt.Println("---------------------------------------")
-			//fmt.Printf("func info -> %v\nfunc obj -> %v\nfunc type -> %v\n", info, obj, objType)
-			//fmt.Println("---------------------------------------")
 			called := parseCallExpr(f, pass)
-			called.show()
+			//called.show()
+			return called
 		}
 	case *ast.SelectorExpr:
 		{
-			//obj := pass.TypesInfo.Selections[f]
-			//fmt.Println("---------------------------------------")
-			//fmt.Printf("method name -> %v\nmethod type -> %v\nmethod receiver -> %v\n", obj.String(), obj.Type().String(), obj.Recv().String())
-			//fmt.Println("---------------------------------------")
 			called := parseSelectorExpr(f, pass)
-			called.show()
+			//called.show()
+			return called
 		}
 	}
+	return Called{}
 }
 
 
 //parse call expr
 
 //parse assign stmt
-func parseAssignStmt(a *ast.AssignStmt, pass *analysis.Pass) {
+func parseAssignStmt(a *ast.AssignStmt, pass *analysis.Pass) []Called {
+	var called []Called
 	for _, r := range a.Rhs {
-		typ := pass.TypesInfo.Types[r].Type.String()
 		switch s := r.(type) {
 		case *ast.SelectorExpr:
-			pass.TypesInfo.Selections[s].Recv().String()
+			{
+				c := parseSelectorExpr(s, pass)
+				called = append(called, c)
+			}
+
+		case *ast.CallExpr:
+			{
+				c := parseCallExpr(s, pass)
+				called = append(called, c)
+			}
 		}
-		//value := pass.TypesInfo.Types[r].Value.String()
-		fmt.Printf("Assign stnt -> (type: %v)\n", typ)
 	}
+	return called
 }
 
 //parse range stmt
@@ -161,16 +183,18 @@ type RangeStmt struct {
         Body       *BlockStmt
 }
  */
-//func parseRangeStmt(stmt *ast.RangeStmt, pass *analysis.Pass) {
-//	body := stmt.Body
-//	value := stmt.Value
-//	x := stmt.X
-//	valueType := pass.TypesInfo.Types[value].Type.String()
-//	xType := pass.TypesInfo.Types[x].Type.String()
-//
-//	parseBody(body, pass)
-//
-//}
+func parseRangeStmt(stmt *ast.RangeStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	x := stmt.X
+	switch x := x.(type) {
+	case *ast.CallExpr:
+		called = append(called, parseCallExpr(x, pass))
+	case *ast.SelectorExpr:
+		called = append(called, parseSelectorExpr(x, pass))
+	}
+	called = append(called, parseBody(stmt.Body, pass)...)
+	return called
+}
 
 //parse for stmt
 /*
@@ -183,9 +207,8 @@ type ForStmt struct {
 }
 
  */
-func parseForStmt(stmt *ast.ForStmt, pass *analysis.Pass) {
-	body := stmt.Body
-	parseBody(body, pass)
+func parseForStmt(stmt *ast.ForStmt, pass *analysis.Pass) []Called {
+	return parseBody(stmt.Body, pass)
 
 }
 
@@ -199,18 +222,22 @@ type IfStmt struct {
         Else Stmt // else branch; or nil
 }
  */
-func parseIfStmt(stmt *ast.IfStmt, pass *analysis.Pass) {
+func parseIfStmt(stmt *ast.IfStmt, pass *analysis.Pass) []Called {
+	var called []Called
 	init := stmt.Init
 	switch init.(type) {
 	case *ast.AssignStmt:
-		parseAssignStmt(init.(*ast.AssignStmt), pass)
+		{
+			c := parseAssignStmt(init.(*ast.AssignStmt), pass)
+			called = append(called, c...)
+		}
 	}
-	body := stmt.Body
-	parseBody(body, pass)
+	called = append(called, parseBody(stmt.Body, pass)...)
 
 	if stmt.Else != nil {
-		parseIfStmt(stmt.Else.(*ast.IfStmt), pass)
+		called = append(called, parseIfStmt(stmt.Else.(*ast.IfStmt), pass)...)
 	}
+	return called
 }
 
 //parse go stmt
@@ -220,11 +247,13 @@ type GoStmt struct {
 	Call *CallExpr
 }
 */
-func parseGoStmt(stmt *ast.GoStmt, pass *analysis.Pass) {
-	call := stmt.Call
-	info := pass.TypesInfo.Types[call].Type
-	fmt.Printf("%v\n", info)
+func parseGoStmt(stmt *ast.GoStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	c := stmt.Call
+	called = append(called, parseCallExpr(c, pass))
+	return called
 }
+
 
 //parse return stmt
 /*
@@ -233,17 +262,125 @@ type ReturnStmt struct {
     Results []Expr    // result expressions; or nil
 }
  */
-//func parseReturnStmt(stmt *ast.ReturnStmt, pass *analysis.Pass) {
-//	if len(stmt.Results) == 0 {
-//		return
-//	}
-//	for _, r := range stmt.Results {
-//		switch r := r.(type) {
-//		case *ast.CallExpr:
-//		case *ast.SelectorExpr:
-//		}
-//	}
-//}
+func parseReturnStmt(stmt *ast.ReturnStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	if len(stmt.Results) == 0 {
+		return called
+	}
+	for _, r := range stmt.Results {
+		switch r := r.(type) {
+		case *ast.CallExpr:
+			called = append(called, parseCallExpr(r, pass))
+		case *ast.SelectorExpr:
+			called = append(called, parseSelectorExpr(r, pass))
+		}
+	}
+	return called
+}
+
+//parse switch stmt
+/*
+type SwitchStmt struct {
+    Switch token.Pos  // position of "switch" keyword
+    Init   Stmt       // initialization statement; or nil
+    Tag    Expr       // tag expression; or nil
+    Body   *BlockStmt // CaseClauses only
+}
+ */
+func parseSwitchStmt(stmt *ast.SwitchStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	init := stmt.Init
+	switch init.(type) {
+	case *ast.AssignStmt:
+		{
+			c := parseAssignStmt(init.(*ast.AssignStmt), pass)
+			called = append(called, c...)
+		}
+	}
+	body := stmt.Body
+	if body == nil {
+		return called
+	}
+	if len(body.List) == 0 {
+		return called
+	}
+	for _, b := range body.List {
+
+		for _, stmt := range b.(*ast.CaseClause).Body {
+			switch s := stmt.(type) {
+			case *ast.BlockStmt:
+				called = append(called, parseBody(s, pass)...)
+			case *ast.AssignStmt:
+				called = append(called, parseAssignStmt(s, pass)...)
+			case *ast.ExprStmt:
+				called = append(called, parseExprStmt(s, pass))
+			case *ast.RangeStmt:
+				called = append(called, parseRangeStmt(s, pass)...)
+			case *ast.ForStmt:
+				called = append(called, parseForStmt(s, pass)...)
+			case *ast.IfStmt:
+				called = append(called, parseIfStmt(s, pass)...)
+			case *ast.ReturnStmt:
+				called = append(called, parseReturnStmt(s, pass)...)
+			case *ast.GoStmt:
+				called = append(called, parseGoStmt(s, pass)...)
+			case *ast.SwitchStmt:
+				called = append(called, parseSwitchStmt(s, pass)...)
+			case *ast.TypeSwitchStmt:
+				called = append(called, parseTypeSwitchStmt(s, pass)...)
+			}
+		}
+	}
+	return called
+}
+
+//parse type switch stmt
+/*
+type TypeSwitchStmt struct {
+        Switch token.Pos  // position of "switch" keyword
+        Init   Stmt       // initialization statement; or nil
+        Assign Stmt       // x := y.(type) or y.(type)
+        Body   *BlockStmt // CaseClauses only
+}
+ */
+func parseTypeSwitchStmt(stmt *ast.TypeSwitchStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	body := stmt.Body
+	if body == nil {
+		return called
+	}
+	if len(body.List) == 0 {
+		return called
+	}
+	for _, b := range body.List {
+
+		for _, stmt := range b.(*ast.CaseClause).Body {
+			switch s := stmt.(type) {
+			case *ast.BlockStmt:
+				called = append(called, parseBody(s, pass)...)
+			case *ast.AssignStmt:
+				called = append(called, parseAssignStmt(s, pass)...)
+			case *ast.ExprStmt:
+				called = append(called, parseExprStmt(s, pass))
+			case *ast.RangeStmt:
+				called = append(called, parseRangeStmt(s, pass)...)
+			case *ast.ForStmt:
+				called = append(called, parseForStmt(s, pass)...)
+			case *ast.IfStmt:
+				called = append(called, parseIfStmt(s, pass)...)
+			case *ast.ReturnStmt:
+				called = append(called, parseReturnStmt(s, pass)...)
+			case *ast.GoStmt:
+				called = append(called, parseGoStmt(s, pass)...)
+			case *ast.SwitchStmt:
+				called = append(called, parseSwitchStmt(s, pass)...)
+			case *ast.TypeSwitchStmt:
+				called = append(called, parseTypeSwitchStmt(s, pass)...)
+			}
+		}
+	}
+	return called
+}
 
 //parse func lit
 /*
@@ -252,7 +389,12 @@ type FuncLit struct {
         Body *BlockStmt // function body
 }
  */
-func parseFuncLit(lit *ast.FuncLit, pass *analysis.Pass) {
+func parseFuncLit(lit *ast.FuncLit, pass *analysis.Pass) []Called {
+	var called []Called
+	body := lit.Body
+	//typ := lit.Type.Results.List[0].Type
+	if len(body.List) == 0 { return called }
 
-
+	called = append(called, parseBody(body, pass)...)
+	return called
 }

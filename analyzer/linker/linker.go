@@ -65,9 +65,18 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		switch n := n.(type) {
 		case *ast.FuncDecl:
 			{
-				parseBody(n.Body, pass)
+				called := parseBody(n.Body, pass)
+				for _, c := range called {
+					c.show()
+				}
 			}
 		case *ast.FuncLit:
+			{
+				called := parseFuncLit(n, pass)
+				for _, c := range called {
+					c.show()
+				}
+			}
 		}
 	})
 	return nil, nil
