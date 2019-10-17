@@ -26,25 +26,83 @@ func parseBody(block *ast.BlockStmt, pass *analysis.Pass) {
 //parse call expr
 func parseCallExpr(expr *ast.CallExpr, pass *analysis.Pass) Called {
 	obj := pass.TypesInfo.Types[expr]
-	typ := obj.Type.String()
-	var name string
+	returnType := obj.Type.String()
 
 	switch c := expr.Fun.(type) {
 	case *ast.Ident:
-		name = c.Name
+		{
+			return Called{
+				Name:         c.Name,
+				ReturnType:   returnType,
+				Receiver:     "",
+				ReceiverType: "",
+				Package:      "",
+			}
+		}
 	case *ast.SelectorExpr:
+		{
+			f := parseSelectorExpr(c, pass)
+			return f
+		}
 	}
 
-	called := Called{
-		Name: name,
-		ReturnType: typ,
-		Receiver:
-
+	return Called{
+		Name: expr.Fun.(*ast.Ident).Name,
+		ReturnType: returnType,
 	}
 }
 
 //parse selector expr
 func parseSelectorExpr(expr *ast.SelectorExpr, pass *analysis.Pass) Called {
+	name := expr.Sel.Name
+	returnType := pass.TypesInfo.Types[expr].Type.String()
+	switch r := expr.X.(type) {
+	case *ast.Ident:
+		{
+			receiver := r.Name
+			var receiverType string
+			var packageName string
+			if pass.TypesInfo.Types[r].Type != nil {
+				receiverType = pass.TypesInfo.Types[r].Type.String()
+				packageName = ""
+			} else {
+				packageName = receiver
+				receiverType = ""
+			}
+			return Called{
+				Name:         name,
+				ReturnType:   returnType,
+				Receiver:     receiver,
+				ReceiverType: receiverType,
+				Package:      packageName,
+			}
+		}
+	case *ast.SelectorExpr:
+	//case *ast.StarExpr:
+		{
+			c :=  parseSelectorExpr(r, pass)
+			receiver := c.Receiver
+			receiverType := c.ReceiverType
+			fmt.Printf("-----------> receiver :%v\n-----------> receiver type :%v\n", receiver, receiver)
+			return Called{
+				Name:name,
+				ReturnType: returnType,
+				Receiver: receiver,
+				ReceiverType: receiverType,
+				Package: c.Package,
+			}
+		}
+	default:
+		fmt.Printf("&&&&&&&&&&&&&-> %v, %T\n", r, r)
+	}
+	//NewBBB().hoge() <- reach here
+	return Called{
+		Name:         name,
+		ReturnType:   returnType,
+		Receiver:     "",
+		ReceiverType: "",
+		Package:      "hogehoge",
+	}
 
 }
 
@@ -54,20 +112,24 @@ func parseExprStmt(stmt *ast.ExprStmt, pass *analysis.Pass) {
 	switch f := stmt.X.(type) {
 	case *ast.CallExpr:
 		{
-			info := f.Fun
-			obj := pass.TypesInfo.Types[f]
-			objType := obj.Type.String()
-			//objValue := obj.Value.String()
-			fmt.Println("---------------------------------------")
-			fmt.Printf("func info -> %v\nfunc obj -> %v\nfunc type -> %v\n", info, obj, objType)
-			fmt.Println("---------------------------------------")
+			//info := f.Fun
+			//obj := pass.TypesInfo.Types[f]
+			//objType := obj.Type.String()
+			////objValue := obj.Value.String()
+			//fmt.Println("---------------------------------------")
+			//fmt.Printf("func info -> %v\nfunc obj -> %v\nfunc type -> %v\n", info, obj, objType)
+			//fmt.Println("---------------------------------------")
+			called := parseCallExpr(f, pass)
+			called.show()
 		}
 	case *ast.SelectorExpr:
 		{
-			obj := pass.TypesInfo.Selections[f]
-			fmt.Println("---------------------------------------")
-			fmt.Printf("method name -> %v\nmethod type -> %v\nmethod receiver -> %v\n", obj.String(), obj.Type().String(), obj.Recv().String())
-			fmt.Println("---------------------------------------")
+			//obj := pass.TypesInfo.Selections[f]
+			//fmt.Println("---------------------------------------")
+			//fmt.Printf("method name -> %v\nmethod type -> %v\nmethod receiver -> %v\n", obj.String(), obj.Type().String(), obj.Recv().String())
+			//fmt.Println("---------------------------------------")
+			called := parseSelectorExpr(f, pass)
+			called.show()
 		}
 	}
 }
@@ -99,16 +161,16 @@ type RangeStmt struct {
         Body       *BlockStmt
 }
  */
-func parseRangeStmt(stmt *ast.RangeStmt, pass *analysis.Pass) {
-	body := stmt.Body
-	value := stmt.Value
-	x := stmt.X
-	valueType := pass.TypesInfo.Types[value].Type.String()
-	xType := pass.TypesInfo.Types[x].Type.String()
-
-	parseBody(body, pass)
-
-}
+//func parseRangeStmt(stmt *ast.RangeStmt, pass *analysis.Pass) {
+//	body := stmt.Body
+//	value := stmt.Value
+//	x := stmt.X
+//	valueType := pass.TypesInfo.Types[value].Type.String()
+//	xType := pass.TypesInfo.Types[x].Type.String()
+//
+//	parseBody(body, pass)
+//
+//}
 
 //parse for stmt
 /*
@@ -171,17 +233,17 @@ type ReturnStmt struct {
     Results []Expr    // result expressions; or nil
 }
  */
-func parseReturnStmt(stmt *ast.ReturnStmt, pass *analysis.Pass) {
-	if len(stmt.Results) == 0 {
-		return
-	}
-	for _, r := range stmt.Results {
-		switch r := r.(type) {
-		case *ast.CallExpr:
-		case *ast.SelectorExpr:
-		}
-	}
-}
+//func parseReturnStmt(stmt *ast.ReturnStmt, pass *analysis.Pass) {
+//	if len(stmt.Results) == 0 {
+//		return
+//	}
+//	for _, r := range stmt.Results {
+//		switch r := r.(type) {
+//		case *ast.CallExpr:
+//		case *ast.SelectorExpr:
+//		}
+//	}
+//}
 
 //parse func lit
 /*

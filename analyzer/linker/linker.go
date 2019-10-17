@@ -2,6 +2,7 @@ package linker
 
 import (
 	"flag"
+	"fmt"
 	"github.com/spectrex02/gorefer"
 	"github.com/spectrex02/gorefer/analyzer/detectDecl"
 	"go/ast"
@@ -17,6 +18,15 @@ type Called struct {
 	Receiver string
 	ReceiverType string
 	Package string
+}
+
+func (called *Called) show() {
+	fmt.Println("==========Called in function==========")
+	fmt.Printf("name : %v\n", called.Name)
+	fmt.Printf("return type : %v\n", called.ReturnType)
+	fmt.Printf("receiver: %v\n", called.Receiver)
+	fmt.Printf("receiver type : %v\n", called.ReceiverType)
+	fmt.Printf("package : %v\n", called.Package)
 }
 //type for mapping between caller function and called function
 type Call map[*ast.FuncDecl][]Called
@@ -43,8 +53,8 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	pkgInfo := pass.ResultOf[detectDecl.Analyzer].(*gorefer.PackageInfo)
-	call := make(Call)
+	//pkgInfo := pass.ResultOf[detectDecl.Analyzer].(*gorefer.PackageInfo)
+	//call := make(Call)
 
 	nodeFilter := []ast.Node{
 		(*ast.FuncDecl)(nil),
