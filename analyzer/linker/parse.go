@@ -12,7 +12,7 @@ func parseBody(block *ast.BlockStmt, pass *analysis.Pass) {
 		switch s := stmt.(type) {
 		case *ast.AssignStmt:
 			{
-				parseAssign(s, pass)
+				parseAssignStmt(s, pass)
 			}
 		case *ast.ExprStmt:
 			parseExprStmt(s, pass)
@@ -23,9 +23,35 @@ func parseBody(block *ast.BlockStmt, pass *analysis.Pass) {
 	}
 }
 
+//parse call expr
+func parseCallExpr(expr *ast.CallExpr, pass *analysis.Pass) Called {
+	obj := pass.TypesInfo.Types[expr]
+	typ := obj.Type.String()
+	var name string
+
+	switch c := expr.Fun.(type) {
+	case *ast.Ident:
+		name = c.Name
+	case *ast.SelectorExpr:
+	}
+
+	called := Called{
+		Name: name,
+		ReturnType: typ,
+		Receiver:
+
+	}
+}
+
+//parse selector expr
+func parseSelectorExpr(expr *ast.SelectorExpr, pass *analysis.Pass) Called {
+
+}
+
+
 //parse expr stmt -> *ast.CallExpr, *ast.SelectorExpr
-func parseExprStmt(expr *ast.ExprStmt, pass *analysis.Pass) {
-	switch f := expr.X.(type) {
+func parseExprStmt(stmt *ast.ExprStmt, pass *analysis.Pass) {
+	switch f := stmt.X.(type) {
 	case *ast.CallExpr:
 		{
 			info := f.Fun
@@ -46,10 +72,17 @@ func parseExprStmt(expr *ast.ExprStmt, pass *analysis.Pass) {
 	}
 }
 
+
+//parse call expr
+
 //parse assign stmt
-func parseAssign(a *ast.AssignStmt, pass *analysis.Pass) {
+func parseAssignStmt(a *ast.AssignStmt, pass *analysis.Pass) {
 	for _, r := range a.Rhs {
 		typ := pass.TypesInfo.Types[r].Type.String()
+		switch s := r.(type) {
+		case *ast.SelectorExpr:
+			pass.TypesInfo.Selections[s].Recv().String()
+		}
 		//value := pass.TypesInfo.Types[r].Value.String()
 		fmt.Printf("Assign stnt -> (type: %v)\n", typ)
 	}
@@ -67,6 +100,13 @@ type RangeStmt struct {
 }
  */
 func parseRangeStmt(stmt *ast.RangeStmt, pass *analysis.Pass) {
+	body := stmt.Body
+	value := stmt.Value
+	x := stmt.X
+	valueType := pass.TypesInfo.Types[value].Type.String()
+	xType := pass.TypesInfo.Types[x].Type.String()
+
+	parseBody(body, pass)
 
 }
 
@@ -82,6 +122,8 @@ type ForStmt struct {
 
  */
 func parseForStmt(stmt *ast.ForStmt, pass *analysis.Pass) {
+	body := stmt.Body
+	parseBody(body, pass)
 
 }
 
@@ -96,7 +138,17 @@ type IfStmt struct {
 }
  */
 func parseIfStmt(stmt *ast.IfStmt, pass *analysis.Pass) {
+	init := stmt.Init
+	switch init.(type) {
+	case *ast.AssignStmt:
+		parseAssignStmt(init.(*ast.AssignStmt), pass)
+	}
+	body := stmt.Body
+	parseBody(body, pass)
 
+	if stmt.Else != nil {
+		parseIfStmt(stmt.Else.(*ast.IfStmt), pass)
+	}
 }
 
 //parse go stmt
@@ -107,7 +159,9 @@ type GoStmt struct {
 }
 */
 func parseGoStmt(stmt *ast.GoStmt, pass *analysis.Pass) {
-
+	call := stmt.Call
+	info := pass.TypesInfo.Types[call].Type
+	fmt.Printf("%v\n", info)
 }
 
 //parse return stmt
@@ -118,7 +172,15 @@ type ReturnStmt struct {
 }
  */
 func parseReturnStmt(stmt *ast.ReturnStmt, pass *analysis.Pass) {
-
+	if len(stmt.Results) == 0 {
+		return
+	}
+	for _, r := range stmt.Results {
+		switch r := r.(type) {
+		case *ast.CallExpr:
+		case *ast.SelectorExpr:
+		}
+	}
 }
 
 //parse func lit

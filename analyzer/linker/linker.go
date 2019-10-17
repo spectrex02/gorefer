@@ -2,7 +2,6 @@ package linker
 
 import (
 	"flag"
-	"fmt"
 	"github.com/spectrex02/gorefer"
 	"github.com/spectrex02/gorefer/analyzer/detectDecl"
 	"go/ast"
@@ -11,8 +10,16 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
+//called function or method information
+type Called struct {
+	Name string
+	ReturnType string
+	Receiver string
+	ReceiverType string
+	Package string
+}
 //type for mapping between caller function and called function
-type Call map[*ast.FuncDecl][]*ast.Ident
+type Call map[*ast.FuncDecl][]Called
 
 
 type Linker struct {
