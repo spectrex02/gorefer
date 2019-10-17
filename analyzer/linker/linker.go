@@ -3,13 +3,22 @@ package linker
 import (
 	"flag"
 	"fmt"
-	//"github.com/spectrex02/gorefer"
+	"github.com/spectrex02/gorefer"
 	"github.com/spectrex02/gorefer/analyzer/detectDecl"
 	"go/ast"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 )
+
+//type for mapping between caller function and called function
+type Call map[*ast.FuncDecl][]*ast.Ident
+
+
+type Linker struct {
+	Pkg gorefer.PackageInfo
+	CallList []Call
+}
 
 var Analyzer = &analysis.Analyzer{
 	Name:             "linker",
@@ -22,9 +31,13 @@ var Analyzer = &analysis.Analyzer{
 	FactTypes:        nil,
 }
 
+
+
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
-	//pkgInfo := pass.ResultOf[detectDecl.Analyzer].(*gorefer.PackageInfo)
+
+	pkgInfo := pass.ResultOf[detectDecl.Analyzer].(*gorefer.PackageInfo)
+	call := make(Call)
 
 	nodeFilter := []ast.Node{
 		(*ast.FuncDecl)(nil),
@@ -34,78 +47,11 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.FuncDecl:
-			parseBody(n.Body, pass)
+			{
+				parseBody(n.Body, pass)
+			}
 		case *ast.FuncLit:
 		}
 	})
 	return nil, nil
-}
-
-func parseBody(block *ast.BlockStmt, pass *analysis.Pass) {
-	if len(block.List) == 0 { return }
-	for _, stmt := range block.List {
-		switch s := stmt.(type) {
-		case *ast.AssignStmt:
-			{
-				parseAssign(s, pass)
-			}
-		case *ast.ExprStmt:
-			parseExprStmt(s, pass)
-		case *ast.RangeStmt:
-		case *ast.ForStmt:
-		case *ast.IfStmt:
-		}
-	}
-}
-
-//parse expr stmt -> *ast.CallExpr, *ast.SelectorExpr
-func parseExprStmt(expr *ast.ExprStmt, pass *analysis.Pass) {
-	switch f := expr.X.(type) {
-	case *ast.CallExpr:
-		{
-			info := f.Fun
-			obj := pass.TypesInfo.Types[f]
-			objType := obj.Type.String()
-			//objValue := obj.Value.String()
-			fmt.Println("---------------------------------------")
-			fmt.Printf("func info -> %v\nfunc obj -> %v\nfunc type -> %v\n", info, obj, objType)
-			fmt.Println("---------------------------------------")
-		}
-	case *ast.SelectorExpr:
-		{
-			obj := pass.TypesInfo.Selections[f]
-			fmt.Println("---------------------------------------")
-			fmt.Printf("method name -> %v\nmethod type -> %v\nmethod receiver -> %v\n", obj.String(), obj.Type().String(), obj.Recv().String())
-			fmt.Println("---------------------------------------")
-		}
-	}
-}
-
-//parse assign stmt
-func parseAssign(a *ast.AssignStmt, pass *analysis.Pass) {
-	for _, r := range a.Rhs {
-		typ := pass.TypesInfo.Types[r].Type.String()
-		//value := pass.TypesInfo.Types[r].Value.String()
-		fmt.Printf("Assign stnt -> (type: %v)\n", typ)
-	}
-}
-
-//parse range stmt
-func parseRangeStmt(stmt *ast.RangeStmt, pass *analysis.Pass) {
-
-}
-
-//parse for stmt
-func parseForStmt(stmt *ast.ForStmt, pass *analysis.Pass) {
-
-}
-
-//parse if stmt
-func parseIfStmt(stmt *ast.IfStmt, pass *analysis.Pass) {
-
-}
-
-//parse go stmt
-func parseGoStmt(stmt *ast.GoStmt, pass *analysis.Pass) {
-
 }
