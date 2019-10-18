@@ -1,6 +1,7 @@
 package gorefer
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 )
@@ -70,6 +71,7 @@ func (p *Parser) GetStructDeclInfo(spec ast.Spec, obj types.Object) *StructInfo 
 }
 
 func (p *Parser) GetFunctionInfo(decl *ast.FuncDecl, obj types.Object) FunctionInfo {
+	fmt.Println(decl.Name)
 	typ := obj.(*types.Func)
 	returnTyp := typ.Type().String()
 	return FunctionInfo{
