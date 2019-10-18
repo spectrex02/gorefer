@@ -58,7 +58,6 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	nodeFilter := []ast.Node{
 		(*ast.FuncDecl)(nil),
-		(*ast.FuncLit)(nil),
 	}
 	//parse AST and link function or method
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
@@ -70,14 +69,10 @@ func run(pass *analysis.Pass) (interface{}, error) {
 					c.show()
 				}
 			}
-		case *ast.FuncLit:
-			{
-				called := parseFuncLit(n, pass)
-				for _, c := range called {
-					c.show()
-				}
-			}
 		}
 	})
+
+
+
 	return nil, nil
 }

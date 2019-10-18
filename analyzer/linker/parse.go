@@ -3,6 +3,7 @@ package linker
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"golang.org/x/tools/go/analysis"
 )
 
@@ -40,6 +41,7 @@ func parseBody(block *ast.BlockStmt, pass *analysis.Pass) []Called {
 func parseCallExpr(expr *ast.CallExpr, pass *analysis.Pass) Called {
 	obj := pass.TypesInfo.Types[expr]
 	returnType := obj.Type.String()
+	//if arguments are func literal...
 
 	switch c := expr.Fun.(type) {
 	case *ast.Ident:
@@ -328,6 +330,8 @@ func parseSwitchStmt(stmt *ast.SwitchStmt, pass *analysis.Pass) []Called {
 				called = append(called, parseSwitchStmt(s, pass)...)
 			case *ast.TypeSwitchStmt:
 				called = append(called, parseTypeSwitchStmt(s, pass)...)
+			case *ast.DeclStmt:
+				called = append(called, parseDeclStmt(s, pass)...)
 			}
 		}
 	}
@@ -382,6 +386,33 @@ func parseTypeSwitchStmt(stmt *ast.TypeSwitchStmt, pass *analysis.Pass) []Called
 	return called
 }
 
+
+//parse decl stmt
+func parseDeclStmt(stmt *ast.DeclStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	switch decl := stmt.Decl.(type) {
+	case *ast.GenDecl:
+		{
+			if decl.Tok != token.VAR { return called }
+			if len(decl.Specs) == 0 { return called }
+			for _, spec := range decl.Specs {
+				switch spec := spec.(type) {
+				case *ast.ValueSpec:
+					{
+						if spec.Values == nil { return called }
+						for _, v := range spec.Values {
+							switch v := v.(type) {
+							case *ast.FuncLit:
+								called = append(called, parseFuncLit(v, pass)...)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return called
+}
 //parse func lit
 /*
 type FuncLit struct {
