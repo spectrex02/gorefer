@@ -9,7 +9,7 @@ type Info interface {
 
 type FunctionInfo struct {
 	Info
-	Id       int
+	Id       FuncId
 	Name     string
 	Receiver interface{}	//string or nil
 	ReceiverType interface{}	//receiver type (string or nil)
@@ -22,7 +22,7 @@ type FunctionInfo struct {
 //struct for storing information of struct
 type StructInfo struct {
 	Info
-	Id int
+	Id StructId
 	Name string
 	//Member map[string]string
 	Member []string
@@ -33,7 +33,7 @@ type StructInfo struct {
 //struct for storing information of interface
 type InterfaceInfo struct {
 	Info
-	Id int
+	Id InterfaceId
 	Name string
 	//Methods map[string][]string
 	Methods []string
@@ -42,7 +42,7 @@ type InterfaceInfo struct {
 
 type VarInfo struct {
 	Info
-	Id int
+	Id VarId
 	Name string
 	Type string
 }
@@ -99,29 +99,29 @@ type VarId struct {
 	Id int
 }
 
-func (fId *FuncId) AllocateId() int {
+func (fId *FuncId) AllocateId() FuncId {
 	fId.Id = fId.Id + 1
-	return fId.Id
+	return *fId
 }
 
-func (sId *StructId) AllocateId() int {
+func (sId *StructId) AllocateId() StructId {
 	sId.Id = sId.Id + 1
-	return sId.Id
+	return *sId
 }
 
-func (iId *InterfaceId) AllocateId() int {
+func (iId *InterfaceId) AllocateId() InterfaceId {
 	iId.Id = iId.Id + 1
-	return iId.Id
+	return *iId
 }
 
-func (vId *VarId) AllocateId() int {
+func (vId *VarId) AllocateId() VarId {
 	vId.Id = vId.Id + 1
-	return vId.Id
+	return *vId
 }
 
 func (f FunctionInfo) Show() {
 	fmt.Println("-----show function info-----")
-	fmt.Println("Id:", f.Id)
+	fmt.Println("Id:", f.Id.Id)
 	fmt.Println("Name:", f.Name)
 	fmt.Println("Package:", f.Package)
 	fmt.Println("Receiver:", f.Receiver)
@@ -134,7 +134,7 @@ func (f FunctionInfo) Show() {
 
 func (s StructInfo) Show() {
 	fmt.Println("-----show struct info-----")
-	fmt.Println("Id:", s.Id)
+	fmt.Println("Id:", s.Id.Id)
 	fmt.Println("Name:", s.Name)
 	fmt.Println("Package:", s.Package)
 	fmt.Println("Member:", s.Member)
@@ -144,14 +144,14 @@ func (s StructInfo) Show() {
 
 func (i InterfaceInfo) Show() {
 	fmt.Println("-----show interface info-----")
-	fmt.Println("Id:", i.Id)
+	fmt.Println("Id:", i.Id.Id)
 	fmt.Println("Name:", i.Name)
 	fmt.Println("Methods:", i.Methods)
 }
 
 func (v VarInfo) Show() {
 	fmt.Println("-----show var info-----")
-	fmt.Println("Id:", v.Id)
+	fmt.Println("Id:", v.Id.Id)
 	fmt.Println("Name:", v.Name)
 	fmt.Println("Type:", v.Type)
 }

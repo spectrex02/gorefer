@@ -2,18 +2,34 @@ package main
 
 import "fmt"
 
-type A struct {}
-
-type I interface {
-	hoge() string
+type A struct {
+	Name string
+	Id int
 }
 
-func (a *A) hoge() string { return "hogehoge"}
-
-
-
-func main() {
-	fmt.Println("hogehoge")	// want
-	fmt.Printf("fugafuga\n") // want
+func hoge() {
+	h := "hogehoge"
+	fmt.Println(h)
 }
 
+func (a *A) ShowName() string {
+	return a.Name
+}
+
+func (a *A) Err() {
+	panic(a.Name)
+}
+
+func New() *A {
+	return &A{
+		Name: "spectre",
+		Id: 1,
+	}
+}
+
+func HHHH() {
+	test := New()
+	test.Err()
+	str := test.ShowName()
+	fmt.Println(str)
+}
