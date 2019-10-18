@@ -111,6 +111,10 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		Var:       varList,
 		Function:  functionList,
 	}
+
+
+	info.ResolveMethodList()
+
 	return info, nil
 }
 

@@ -1,4 +1,4 @@
-package linker
+package findcall
 
 import (
 	"fmt"

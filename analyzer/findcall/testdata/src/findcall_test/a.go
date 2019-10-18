@@ -1,4 +1,4 @@
-package linker_test
+package findcall_test
 
 import "fmt"
 
