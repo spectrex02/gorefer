@@ -32,6 +32,10 @@ func parseBody(block *ast.BlockStmt, pass *analysis.Pass) []Called {
 			called = append(called, parseSwitchStmt(s, pass)...)
 		case *ast.TypeSwitchStmt:
 			called = append(called, parseTypeSwitchStmt(s, pass)...)
+		case *ast.DeclStmt:
+			called = append(called, parseDeclStmt(s, pass)...)
+		case *ast.DeferStmt:
+			called = append(called, parseDeferStmt(s, pass)...)
 		}
 	}
 	return called
@@ -236,8 +240,14 @@ func parseIfStmt(stmt *ast.IfStmt, pass *analysis.Pass) []Called {
 	}
 	called = append(called, parseBody(stmt.Body, pass)...)
 
+	//else or else if
 	if stmt.Else != nil {
-		called = append(called, parseIfStmt(stmt.Else.(*ast.IfStmt), pass)...)
+		switch e := stmt.Else.(type) {
+		case *ast.BlockStmt:
+			called = append(called, parseBody(e, pass)...)
+		case *ast.IfStmt:
+			called = append(called, parseIfStmt(stmt.Else.(*ast.IfStmt), pass)...)
+		}
 	}
 	return called
 }
@@ -332,6 +342,8 @@ func parseSwitchStmt(stmt *ast.SwitchStmt, pass *analysis.Pass) []Called {
 				called = append(called, parseTypeSwitchStmt(s, pass)...)
 			case *ast.DeclStmt:
 				called = append(called, parseDeclStmt(s, pass)...)
+			case *ast.DeferStmt:
+				called = append(called, parseDeferStmt(s, pass)...)
 			}
 		}
 	}
@@ -380,12 +392,22 @@ func parseTypeSwitchStmt(stmt *ast.TypeSwitchStmt, pass *analysis.Pass) []Called
 				called = append(called, parseSwitchStmt(s, pass)...)
 			case *ast.TypeSwitchStmt:
 				called = append(called, parseTypeSwitchStmt(s, pass)...)
+			case *ast.DeclStmt:
+				called = append(called, parseDeclStmt(s, pass)...)
+			case *ast.DeferStmt:
+				called = append(called, parseDeferStmt(s, pass)...)
 			}
 		}
 	}
 	return called
 }
 
+//parse defer stmt
+func parseDeferStmt(stmt *ast.DeferStmt, pass *analysis.Pass) []Called {
+	var called []Called
+	called = append(called, parseCallExpr(stmt.Call, pass))
+	return called
+}
 
 //parse decl stmt
 func parseDeclStmt(stmt *ast.DeclStmt, pass *analysis.Pass) []Called {
