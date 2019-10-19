@@ -1,12 +1,35 @@
-package main
+package testfiles
 
+import "fmt"
 
-type B struct {
+type B interface {
+	hoge() BB
+}
+type BB struct {
 	name string
 }
-func (b *B) hoge() string {
-	return b.name
+
+type BBB struct {
+	name string
+}
+func NewBBB() *BBB {
+	return &BBB{name:"hoge"}
 }
 
-const testVar  = "string"
-var bvar int
+func (bbb *BBB) hoge() BB {
+	return BB{name:"hogehogehoge"}
+}
+
+func (bb *BB) show() {
+	fmt.Println(bb.name)
+}
+
+func complexType() {
+	NewBBB().hoge()
+	b := NewBBB().hoge()
+	fmt.Println(b)
+
+	if true {
+		b.show()
+	}
+}

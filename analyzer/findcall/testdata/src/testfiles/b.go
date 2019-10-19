@@ -1,4 +1,4 @@
-package findcall_test
+package testfiles
 
 import "fmt"
 

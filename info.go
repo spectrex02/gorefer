@@ -54,6 +54,9 @@ type PackageInfo struct {
 	Function []FunctionInfo
 }
 
+type ProjectInfo struct {
+	Pkgs []PackageInfo
+}
 //struct for get testfiles method or function list called by some function
 type CalledFunction struct {
 	Info

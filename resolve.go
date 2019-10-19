@@ -1,6 +1,10 @@
 package gorefer
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"log"
+)
 
 //this file contain resolvers from *ast.FuncDecl or function name(string) to FunctionInfo
 
@@ -21,5 +25,50 @@ func (pkg *PackageInfo) ResolveMethodList() {
 		typ.MethodList = lis
 		fmt.Printf("methods list(type %v)-> %v\n", typ.Name, typ.MethodList)
 	}
+}
+
+//util function
+func FindFunction(pkg PackageInfo, id int) (interface{}, error) {
+	for _, f := range pkg.Function {
+		if f.Id.Id == id {
+			return f, nil
+		}
+	}
+	log.Printf("Not found such function.")
+	err := errors.New("Not found such function.")
+	return nil, err
+}
+
+func FindStruct(pkg PackageInfo, id int) (interface{}, error) {
+	for _, s := range pkg.Struct {
+		if s.Id.Id == id {
+			return s, nil
+		}
+	}
+	log.Printf("Not found such struct.")
+	err := errors.New("Not found such struct.")
+	return nil, err
+}
+
+func FindInterface(pkg PackageInfo, id int) (interface{}, error) {
+	for _, i := range pkg.Interface {
+		if i.Id.Id == id {
+			return i, nil
+		}
+	}
+	log.Printf("Not found such interface.")
+	err := errors.New("Not found such interface.")
+	return nil, err
+}
+
+func FindVar(pkg PackageInfo, id int) (interface{}, error) {
+	for _, v := range pkg.Var {
+		if v.Id.Id == id {
+			return v, nil
+		}
+	}
+	log.Printf("Not found such valiable.")
+	err := errors.New("Not found such variable.")
+	return nil, err
 }
 

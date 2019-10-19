@@ -1,4 +1,4 @@
-package main
+package testfiles
 
 import "fmt"
 
@@ -27,7 +27,7 @@ func New() *A {
 	}
 }
 
-func HHHH() {
+func main() {
 	test := New()
 	test.Err()
 	str := test.ShowName()

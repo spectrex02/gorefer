@@ -7,6 +7,6 @@ import (
 
 func TestFindCall(t *testing.T) {
 	testdata := analysistest.TestData()
-	analysistest.Run(t, testdata, Analyzer, "findcall_test")
-	analysistest.Run(t, testdata, Analyzer, "findcall_test/check_statement")
+	analysistest.Run(t, testdata, Analyzer, "testfiles")
+	analysistest.Run(t, testdata, Analyzer, "testfiles/check_statement")
 }
