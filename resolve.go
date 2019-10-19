@@ -17,8 +17,8 @@ func (pkg *PackageInfo) ResolveMethodList() {
 	for _, typ := range pkg.Struct {
 		var lis []FunctionInfo
 		for _, f := range pkg.Function {
-			if typ.Name == f.ReceiverType {
-				fmt.Printf("function:%v is methods of %v type.\n", f.Name, typ.Name)
+			if typ.Name == f.FuncInfo.ReceiverType {
+				fmt.Printf("function:%v is methods of %v type.\n", f.FuncInfo.Name, typ.Name)
 				lis = append(lis, f)
 			}
 		}
@@ -28,7 +28,7 @@ func (pkg *PackageInfo) ResolveMethodList() {
 }
 
 //util function
-func FindFunction(pkg PackageInfo, id int) (interface{}, error) {
+func FindFunctionFromId(pkg PackageInfo, id int) (interface{}, error) {
 	for _, f := range pkg.Function {
 		if f.Id.Id == id {
 			return f, nil
@@ -39,7 +39,7 @@ func FindFunction(pkg PackageInfo, id int) (interface{}, error) {
 	return nil, err
 }
 
-func FindStruct(pkg PackageInfo, id int) (interface{}, error) {
+func FindStructFromId(pkg PackageInfo, id int) (interface{}, error) {
 	for _, s := range pkg.Struct {
 		if s.Id.Id == id {
 			return s, nil
@@ -50,7 +50,7 @@ func FindStruct(pkg PackageInfo, id int) (interface{}, error) {
 	return nil, err
 }
 
-func FindInterface(pkg PackageInfo, id int) (interface{}, error) {
+func FindInterfaceFromId(pkg PackageInfo, id int) (interface{}, error) {
 	for _, i := range pkg.Interface {
 		if i.Id.Id == id {
 			return i, nil
@@ -61,7 +61,7 @@ func FindInterface(pkg PackageInfo, id int) (interface{}, error) {
 	return nil, err
 }
 
-func FindVar(pkg PackageInfo, id int) (interface{}, error) {
+func FindVarFromId(pkg PackageInfo, id int) (interface{}, error) {
 	for _, v := range pkg.Var {
 		if v.Id.Id == id {
 			return v, nil

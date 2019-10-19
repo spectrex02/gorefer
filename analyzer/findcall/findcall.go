@@ -2,9 +2,9 @@ package findcall
 
 import (
 	"flag"
-	"fmt"
 	"github.com/spectrex02/gorefer"
 	"go/ast"
+	"go/types"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
@@ -12,29 +12,16 @@ import (
 )
 
 //called function or method information
-type Called struct {
-	Name string
-	ReturnType string
-	Receiver string
-	ReceiverType string
-	Package string
-}
 
-func (called *Called) show() {
-	fmt.Println("==========Called in function==========")
-	fmt.Printf("name : %v\n", called.Name)
-	fmt.Printf("return type : %v\n", called.ReturnType)
-	fmt.Printf("receiver: %v\n", called.Receiver)
-	fmt.Printf("receiver type : %v\n", called.ReceiverType)
-	fmt.Printf("package : %v\n", called.Package)
-}
+
+
 //type for mapping between caller function and called function
-type Call map[*ast.FuncDecl][]Called
+
 
 
 type Linker struct {
 	Pkg gorefer.PackageInfo
-	CallList []Call
+	CallList []gorefer.Call
 }
 
 var Analyzer = &analysis.Analyzer{
@@ -44,7 +31,7 @@ var Analyzer = &analysis.Analyzer{
 	Run:              run,
 	RunDespiteErrors: true,
 	Requires:         []*analysis.Analyzer{inspect.Analyzer},
-	ResultType:       reflect.TypeOf(*new(Call)),
+	ResultType:       reflect.TypeOf(*new(gorefer.Call)),
 	FactTypes:        nil,
 }
 
@@ -52,7 +39,7 @@ var Analyzer = &analysis.Analyzer{
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
-	call := make(Call)
+	call := make(gorefer.Call)
 	nodeFilter := []ast.Node{
 		(*ast.FuncDecl)(nil),
 	}
@@ -62,15 +49,25 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		case *ast.FuncDecl:
 			{
 				called := parseBody(n.Body, pass)
-				//for _, c := range called {
-				//	c.show()
-				//}
-				call[n] = called
+				callerReturnType := pass.TypesInfo.Defs[n.Name].(*types.Func).Type().String()
+				caller := gorefer.Func{
+					Name:         n.Name.Name,
+					ReturnType:   callerReturnType,
+					Receiver:     resolveReceiverName(gorefer.GetReceiver(n)),
+					ReceiverType: resolveReceiverName(gorefer.GetReceiverType(n)),
+					Package:      pass.TypesInfo.Defs[n.Name].Pkg().Name(),
+				}
+				for _, c := range called {
+					c.Show()
+				}
+				call[caller] = called
 			}
 		}
 	})
-
-
-
 	return call, nil
+}
+
+func resolveReceiverName(r interface{}) string {
+	if r == nil { return "" }
+	return r.(string)
 }

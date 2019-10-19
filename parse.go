@@ -74,25 +74,27 @@ func (p *Parser) GetFunctionInfo(decl *ast.FuncDecl, obj types.Object) FunctionI
 	fmt.Println(decl.Name)
 	typ := obj.(*types.Func)
 	returnTyp := typ.Type().String()
+	info := Func{
+		Name:         decl.Name.Name,
+		Receiver:     stringer(GetReceiver(decl)),
+		ReceiverType: stringer(GetReceiverType(decl)),
+		ReturnType:   returnTyp,
+		Package:      typ.Pkg().Name(),
+	}
 	return FunctionInfo{
 		Id:           p.FuncId.AllocateId(),
-		Name:         decl.Name.Name,
-		Receiver:     getReceiver(decl),
-		ReceiverType: getReceiverType(decl),
-		ReturnType:   returnTyp,
+		FuncInfo: info,
 		Called:       nil,
-		Package:      typ.Pkg().Name(),
-		Body:         Block{},
 	}
 }
 
-func getReceiver(f *ast.FuncDecl) interface{} {
+func GetReceiver(f *ast.FuncDecl) interface{} {
 	if f.Recv == nil { return nil }
 	if len(f.Recv.List[0].Names) == 0 { return nil }
 	return f.Recv.List[0].Names[0].Name
 }
 
-func getReceiverType(f *ast.FuncDecl) interface{} {
+func GetReceiverType(f *ast.FuncDecl) interface{} {
 	if f.Recv == nil { return nil }
 	if len(f.Recv.List[0].Names) == 0 { return nil }
 	switch f.Recv.List[0].Type.(type) {
@@ -122,4 +124,9 @@ func (p *Parser) GetVarDecl(spec *ast.ValueSpec, obj types.Object) []VarInfo {
 		lis = append(lis, info)
 	}
 	return lis
+}
+
+func stringer(str interface{}) string {
+	if str == nil { return "" }
+	return str.(string)
 }

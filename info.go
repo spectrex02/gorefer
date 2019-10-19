@@ -10,13 +10,13 @@ type Info interface {
 type FunctionInfo struct {
 	Info
 	Id       FuncId
-	Name     string
-	Receiver interface{}	//string or nil
-	ReceiverType interface{}	//receiver type (string or nil)
-	ReturnType interface{}	//return type (string or nil)
-	Called   []int
-	Package  string
-	Body Block	//function body
+	FuncInfo Func
+	//Name     string
+	//Receiver interface{}	//string or nil
+	//ReceiverType interface{}	//receiver type (string or nil)
+	//ReturnType interface{}	//return type (string or nil)
+	//Package  string
+	Called   []Func
 }
 
 //struct for storing information of struct
@@ -48,6 +48,7 @@ type VarInfo struct {
 }
 
 type PackageInfo struct {
+	Name string
 	Struct []StructInfo
 	Interface []InterfaceInfo
 	Var []VarInfo
@@ -58,28 +59,24 @@ type ProjectInfo struct {
 	Pkgs []PackageInfo
 }
 //struct for get testfiles method or function list called by some function
-type CalledFunction struct {
-	Info
-	Receiver string
+
+type Func struct {
 	Name string
+	ReturnType string
+	Receiver string
+	ReceiverType string
+	Package string
 }
 
+type Call map[Func][]Func
 
-//struct for block stmt {...}
-type Block struct {
-	Info
-	Called []CalledFunction
-	AssignVars []VarInfo
-	Sub []SubBlock
-}
-
-type SubBlock struct {
-	Block
-}
-
-
-func (c *CalledFunction) Show() {
-	fmt.Printf("recv -> %s : name -> %s\n", c.Receiver, c.Name)
+func (f *Func) Show() {
+	fmt.Println("==========Called in function==========")
+	fmt.Printf("name : %v\n", f.Name)
+	fmt.Printf("return type : %v\n", f.ReturnType)
+	fmt.Printf("receiver: %v\n", f.Receiver)
+	fmt.Printf("receiver type : %v\n", f.ReceiverType)
+	fmt.Printf("package : %v\n", f.Package)
 }
 
 //interface some type
@@ -125,13 +122,12 @@ func (vId *VarId) AllocateId() VarId {
 func (f FunctionInfo) Show() {
 	fmt.Println("-----show function info-----")
 	fmt.Println("Id:", f.Id.Id)
-	fmt.Println("Name:", f.Name)
-	fmt.Println("Package:", f.Package)
-	fmt.Println("Receiver:", f.Receiver)
-	fmt.Println("Receiver Type:", f.ReceiverType)
-	fmt.Println("Return Type:", f.ReturnType)
+	fmt.Println("Name:", f.FuncInfo.Name)
+	fmt.Println("Package:", f.FuncInfo.Package)
+	fmt.Println("Receiver:", f.FuncInfo.Receiver)
+	fmt.Println("Receiver Type:", f.FuncInfo.ReceiverType)
+	fmt.Println("Return Type:", f.FuncInfo.ReturnType)
 	fmt.Println("Called:", f.Called)
-	fmt.Println("Body:", f.Body)
 	fmt.Printf("\n")
 }
 
