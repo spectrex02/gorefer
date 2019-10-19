@@ -64,8 +64,22 @@ func parseCallExpr(expr *ast.CallExpr, pass *analysis.Pass) gorefer.Func {
 			f := parseSelectorExpr(c, pass)
 			return f
 		}
+	case *ast.FuncLit:
+		{
+			fmt.Printf("UNNAMED FUNCTION IS FOUND!!!!!!!\n")
+		}
 	}
 
+	switch expr.Fun.(type) {
+	case *ast.FuncLit:
+		return gorefer.Func{
+			Name:         "un named function",
+			ReturnType:   returnType,
+			Receiver:     "",
+			ReceiverType: "",
+			Package:      "",
+		}
+	}
 	return gorefer.Func{
 		Name: expr.Fun.(*ast.Ident).Name,
 		ReturnType: returnType,
