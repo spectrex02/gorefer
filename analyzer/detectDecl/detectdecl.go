@@ -105,12 +105,15 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 		}
 	})
+	pkg := pass.Pkg.Name()
 	info := &gorefer.PackageInfo{
+		Name: pkg,
 		Struct:    structList,
 		Interface: interfaceList,
 		Var:       varList,
 		Function:  functionList,
 	}
+	info.ResolveMethodList()
 	return info, nil
 }
 

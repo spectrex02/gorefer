@@ -9,20 +9,20 @@ type Info interface {
 
 type FunctionInfo struct {
 	Info
-	Id       int
-	Name     string
-	Receiver interface{}	//string or nil
-	ReceiverType interface{}	//receiver type (string or nil)
-	ReturnType interface{}	//return type (string or nil)
-	Called   []int
-	Package  string
-	Body Block	//function body
+	Id       FuncId
+	FuncInfo Func
+	//Name     string
+	//Receiver interface{}	//string or nil
+	//ReceiverType interface{}	//receiver type (string or nil)
+	//ReturnType interface{}	//return type (string or nil)
+	//Package  string
+	Called   []Func
 }
 
 //struct for storing information of struct
 type StructInfo struct {
 	Info
-	Id int
+	Id StructId
 	Name string
 	//Member map[string]string
 	Member []string
@@ -33,7 +33,7 @@ type StructInfo struct {
 //struct for storing information of interface
 type InterfaceInfo struct {
 	Info
-	Id int
+	Id InterfaceId
 	Name string
 	//Methods map[string][]string
 	Methods []string
@@ -42,41 +42,41 @@ type InterfaceInfo struct {
 
 type VarInfo struct {
 	Info
-	Id int
+	Id VarId
 	Name string
 	Type string
 }
 
 type PackageInfo struct {
+	Name string
 	Struct []StructInfo
 	Interface []InterfaceInfo
 	Var []VarInfo
 	Function []FunctionInfo
 }
 
+type ProjectInfo struct {
+	Pkgs []PackageInfo
+}
 //struct for get testfiles method or function list called by some function
-type CalledFunction struct {
-	Info
-	Receiver string
+
+type Func struct {
 	Name string
+	ReturnType string
+	Receiver string
+	ReceiverType string
+	Package string
 }
 
+type Call map[Func][]Func
 
-//struct for block stmt {...}
-type Block struct {
-	Info
-	Called []CalledFunction
-	AssignVars []VarInfo
-	Sub []SubBlock
-}
-
-type SubBlock struct {
-	Block
-}
-
-
-func (c *CalledFunction) Show() {
-	fmt.Printf("recv -> %s : name -> %s\n", c.Receiver, c.Name)
+func (f *Func) Show() {
+	fmt.Println("==========Called in function==========")
+	fmt.Printf("name : %v\n", f.Name)
+	fmt.Printf("return type : %v\n", f.ReturnType)
+	fmt.Printf("receiver: %v\n", f.Receiver)
+	fmt.Printf("receiver type : %v\n", f.ReceiverType)
+	fmt.Printf("package : %v\n", f.Package)
 }
 
 //interface some type
@@ -99,42 +99,41 @@ type VarId struct {
 	Id int
 }
 
-func (fId *FuncId) AllocateId() int {
+func (fId *FuncId) AllocateId() FuncId {
 	fId.Id = fId.Id + 1
-	return fId.Id
+	return *fId
 }
 
-func (sId *StructId) AllocateId() int {
+func (sId *StructId) AllocateId() StructId {
 	sId.Id = sId.Id + 1
-	return sId.Id
+	return *sId
 }
 
-func (iId *InterfaceId) AllocateId() int {
+func (iId *InterfaceId) AllocateId() InterfaceId {
 	iId.Id = iId.Id + 1
-	return iId.Id
+	return *iId
 }
 
-func (vId *VarId) AllocateId() int {
+func (vId *VarId) AllocateId() VarId {
 	vId.Id = vId.Id + 1
-	return vId.Id
+	return *vId
 }
 
 func (f FunctionInfo) Show() {
 	fmt.Println("-----show function info-----")
-	fmt.Println("Id:", f.Id)
-	fmt.Println("Name:", f.Name)
-	fmt.Println("Package:", f.Package)
-	fmt.Println("Receiver:", f.Receiver)
-	fmt.Println("Receiver Type:", f.ReceiverType)
-	fmt.Println("Return Type:", f.ReturnType)
+	fmt.Println("Id:", f.Id.Id)
+	fmt.Println("Name:", f.FuncInfo.Name)
+	fmt.Println("Package:", f.FuncInfo.Package)
+	fmt.Println("Receiver:", f.FuncInfo.Receiver)
+	fmt.Println("Receiver Type:", f.FuncInfo.ReceiverType)
+	fmt.Println("Return Type:", f.FuncInfo.ReturnType)
 	fmt.Println("Called:", f.Called)
-	fmt.Println("Body:", f.Body)
 	fmt.Printf("\n")
 }
 
 func (s StructInfo) Show() {
 	fmt.Println("-----show struct info-----")
-	fmt.Println("Id:", s.Id)
+	fmt.Println("Id:", s.Id.Id)
 	fmt.Println("Name:", s.Name)
 	fmt.Println("Package:", s.Package)
 	fmt.Println("Member:", s.Member)
@@ -144,14 +143,14 @@ func (s StructInfo) Show() {
 
 func (i InterfaceInfo) Show() {
 	fmt.Println("-----show interface info-----")
-	fmt.Println("Id:", i.Id)
+	fmt.Println("Id:", i.Id.Id)
 	fmt.Println("Name:", i.Name)
 	fmt.Println("Methods:", i.Methods)
 }
 
 func (v VarInfo) Show() {
 	fmt.Println("-----show var info-----")
-	fmt.Println("Id:", v.Id)
+	fmt.Println("Id:", v.Id.Id)
 	fmt.Println("Name:", v.Name)
 	fmt.Println("Type:", v.Type)
 }
