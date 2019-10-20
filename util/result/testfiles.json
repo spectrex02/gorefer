@@ -1,0 +1,145 @@
+{
+	"name": "testfiles",
+	"struct": [
+		{
+			"id": 1,
+			"name": "A",
+			"package": "testfiles",
+			"member": [
+				"Name",
+				"Id"
+			],
+			"methods": null
+		},
+		{
+			"id": 2,
+			"name": "BB",
+			"package": "testfiles",
+			"member": [
+				"name"
+			],
+			"methods": null
+		},
+		{
+			"id": 3,
+			"name": "BBB",
+			"package": "testfiles",
+			"member": [
+				"name"
+			],
+			"methods": null
+		}
+	],
+	"interface": [
+		{
+			"id": 1,
+			"name": "B",
+			"package": "testfiles",
+			"methods": [
+				"hoge"
+			]
+		}
+	],
+	"function": [
+		{
+			"id": 1,
+			"info": {
+				"name": "hoge",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 2,
+			"info": {
+				"name": "ShowName",
+				"return_type": "func() string",
+				"receiver": "a",
+				"receiver_type": "A",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 3,
+			"info": {
+				"name": "Err",
+				"return_type": "func()",
+				"receiver": "a",
+				"receiver_type": "A",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 4,
+			"info": {
+				"name": "New",
+				"return_type": "func() *testfiles.A",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 5,
+			"info": {
+				"name": "main",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 6,
+			"info": {
+				"name": "NewBBB",
+				"return_type": "func() *testfiles.BBB",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 7,
+			"info": {
+				"name": "hoge",
+				"return_type": "func() testfiles.BB",
+				"receiver": "bbb",
+				"receiver_type": "BBB",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 8,
+			"info": {
+				"name": "show",
+				"return_type": "func()",
+				"receiver": "bb",
+				"receiver_type": "BB",
+				"package": "testfiles"
+			},
+			"call": null
+		},
+		{
+			"id": 9,
+			"info": {
+				"name": "complexType",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": null
+		}
+	],
+	"var": null
+}

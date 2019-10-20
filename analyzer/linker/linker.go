@@ -7,6 +7,7 @@ import (
 	"github.com/spectrex02/gorefer/analyzer/detectDecl"
 	"github.com/spectrex02/gorefer/analyzer/findcall"
 	"golang.org/x/tools/go/analysis"
+	"reflect"
 )
 
 var Analyzer = &analysis.Analyzer{
@@ -16,7 +17,7 @@ var Analyzer = &analysis.Analyzer{
 	Run:              run,
 	RunDespiteErrors: false,
 	Requires:         []*analysis.Analyzer{detectDecl.Analyzer, findcall.Analyzer},
-	ResultType:       nil,
+	ResultType:       reflect.TypeOf(*new(gorefer.PackageInfo)),
 	FactTypes:        nil,
 }
 
@@ -24,18 +25,19 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	pkgInfo := pass.ResultOf[detectDecl.Analyzer].(*gorefer.PackageInfo)
 	call := pass.ResultOf[findcall.Analyzer].(gorefer.Call)
 	fmt.Println(pkgInfo.Name)
-	Link(*pkgInfo, call)
-	return nil, nil
+	tmp := Link(*pkgInfo, call)
+	return tmp, nil
 }
 
 
 //link called and caller
-func Link(pkgInfo gorefer.PackageInfo, call gorefer.Call) {
+func Link(pkgInfo gorefer.PackageInfo, call gorefer.Call) gorefer.PackageInfo {
 	for _, f := range pkgInfo.Function {
 		called := call[f.FuncInfo]
 		if called == nil { continue }
-		f.Called = called
+		f.Call = called
 		f.Show()
 	}
+	return pkgInfo
 }
 
