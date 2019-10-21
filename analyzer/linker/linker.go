@@ -5,8 +5,8 @@ import (
 	"github.com/spectrex02/gorefer"
 	"github.com/spectrex02/gorefer/analyzer/detectDecl"
 	"github.com/spectrex02/gorefer/analyzer/findcall"
+	"github.com/spectrex02/gorefer/util"
 	"golang.org/x/tools/go/analysis"
-	"reflect"
 )
 
 var Analyzer = &analysis.Analyzer{
@@ -16,7 +16,7 @@ var Analyzer = &analysis.Analyzer{
 	Run:              run,
 	RunDespiteErrors: false,
 	Requires:         []*analysis.Analyzer{detectDecl.Analyzer, findcall.Analyzer},
-	ResultType:       reflect.TypeOf(new(gorefer.PackageInfo)),
+	//ResultType:       reflect.TypeOf(new(gorefer.PackageInfo)),
 	FactTypes:        nil,
 }
 
@@ -24,11 +24,14 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	pkgInfo := pass.ResultOf[detectDecl.Analyzer].(*gorefer.PackageInfo)
 	call := pass.ResultOf[findcall.Analyzer].(gorefer.Call)
 	//fmt.Println(pkgInfo.Name)
-	tmp := Link(pkgInfo, call)
-	for _, f := range tmp.Function {
+	result := Link(pkgInfo, call)
+	for _, f := range result.Function {
 		f.Show()
 	}
-	return tmp, nil
+	resultJson := util.New(*result)
+	jsonData := resultJson.ToJson()
+	util.WriteJsonFile(result.Name, jsonData)
+	return nil, nil
 }
 
 
