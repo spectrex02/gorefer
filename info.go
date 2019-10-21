@@ -16,7 +16,7 @@ type FunctionInfo struct {
 	//ReceiverType interface{}	//receiver type (string or nil)
 	//ReturnType interface{}	//return type (string or nil)
 	//Package  string
-	Called   []Func
+	Call   []Func
 }
 
 //struct for storing information of struct
@@ -127,7 +127,7 @@ func (f FunctionInfo) Show() {
 	fmt.Println("Receiver:", f.FuncInfo.Receiver)
 	fmt.Println("Receiver Type:", f.FuncInfo.ReceiverType)
 	fmt.Println("Return Type:", f.FuncInfo.ReturnType)
-	fmt.Println("Called:", f.Called)
+	fmt.Println("Call:", f.Call)
 	fmt.Printf("\n")
 }
 
