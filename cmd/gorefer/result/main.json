@@ -1,0 +1,50 @@
+{
+	"name": "main",
+	"struct": null,
+	"interface": null,
+	"function": [
+		{
+			"id": 2,
+			"info": {
+				"name": "main",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "main"
+			},
+			"call": [
+				{
+					"name": "MainStart",
+					"return_type": "func(deps testing.testDeps, tests []testing.InternalTest, benchmarks []testing.InternalBenchmark, examples []testing.InternalExample) *testing.M",
+					"receiver": "testing",
+					"receiver_type": "",
+					"package": "testing"
+				},
+				{
+					"name": "Exit",
+					"return_type": "func(code int)",
+					"receiver": "os",
+					"receiver_type": "",
+					"package": "os"
+				}
+			]
+		}
+	],
+	"var": [
+		{
+			"id": 1,
+			"name": "tests",
+			"type": "[]testing.InternalTest"
+		},
+		{
+			"id": 2,
+			"name": "benchmarks",
+			"type": "[]testing.InternalBenchmark"
+		},
+		{
+			"id": 3,
+			"name": "examples",
+			"type": "[]testing.InternalExample"
+		}
+	]
+}
