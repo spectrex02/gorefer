@@ -1,0 +1,202 @@
+{
+	"name": "testfiles",
+	"struct": [
+		{
+			"id": 1,
+			"name": "A",
+			"package": "testfiles",
+			"member": [
+				"Name",
+				"Id"
+			],
+			"methods": null
+		},
+		{
+			"id": 2,
+			"name": "BB",
+			"package": "testfiles",
+			"member": [
+				"name"
+			],
+			"methods": null
+		},
+		{
+			"id": 3,
+			"name": "BBB",
+			"package": "testfiles",
+			"member": [
+				"name"
+			],
+			"methods": null
+		}
+	],
+	"interface": [
+		{
+			"id": 1,
+			"name": "B",
+			"package": "testfiles",
+			"methods": [
+				"hoge"
+			]
+		}
+	],
+	"function": [
+		{
+			"id": 1,
+			"info": {
+				"name": "hoge",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": [
+				{
+					"name": "Println",
+					"return_type": "func(a ...interface{}) (n int, err error)",
+					"receiver": "fmt",
+					"receiver_type": "",
+					"package": "fmt"
+				}
+			]
+		},
+		{
+			"id": 2,
+			"info": {
+				"name": "ShowName",
+				"return_type": "func() string",
+				"receiver": "a",
+				"receiver_type": "A",
+				"package": "testfiles"
+			},
+			"call": [
+				{
+					"name": "Name",
+					"return_type": "string",
+					"receiver": "a",
+					"receiver_type": "*testfiles.A",
+					"package": ""
+				}
+			]
+		},
+		{
+			"id": 3,
+			"info": {
+				"name": "Err",
+				"return_type": "func()",
+				"receiver": "a",
+				"receiver_type": "A",
+				"package": "testfiles"
+			},
+			"call": [
+				{
+					"name": "panic",
+					"return_type": "()",
+					"receiver": "",
+					"receiver_type": "",
+					"package": ""
+				}
+			]
+		},
+		{
+			"id": 5,
+			"info": {
+				"name": "main",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": [
+				{
+					"name": "New",
+					"return_type": "*testfiles.A",
+					"receiver": "",
+					"receiver_type": "",
+					"package": ""
+				},
+				{
+					"name": "Err",
+					"return_type": "func()",
+					"receiver": "test",
+					"receiver_type": "*testfiles.A",
+					"package": ""
+				},
+				{
+					"name": "ShowName",
+					"return_type": "func() string",
+					"receiver": "test",
+					"receiver_type": "*testfiles.A",
+					"package": ""
+				},
+				{
+					"name": "Println",
+					"return_type": "func(a ...interface{}) (n int, err error)",
+					"receiver": "fmt",
+					"receiver_type": "",
+					"package": "fmt"
+				}
+			]
+		},
+		{
+			"id": 8,
+			"info": {
+				"name": "show",
+				"return_type": "func()",
+				"receiver": "bb",
+				"receiver_type": "BB",
+				"package": "testfiles"
+			},
+			"call": [
+				{
+					"name": "Println",
+					"return_type": "func(a ...interface{}) (n int, err error)",
+					"receiver": "fmt",
+					"receiver_type": "",
+					"package": "fmt"
+				}
+			]
+		},
+		{
+			"id": 9,
+			"info": {
+				"name": "complexType",
+				"return_type": "func()",
+				"receiver": "",
+				"receiver_type": "",
+				"package": "testfiles"
+			},
+			"call": [
+				{
+					"name": "hoge",
+					"return_type": "func() testfiles.BB",
+					"receiver": "NewBBB",
+					"receiver_type": "*testfiles.BBB",
+					"package": ""
+				},
+				{
+					"name": "hoge",
+					"return_type": "func() testfiles.BB",
+					"receiver": "NewBBB",
+					"receiver_type": "*testfiles.BBB",
+					"package": ""
+				},
+				{
+					"name": "Println",
+					"return_type": "func(a ...interface{}) (n int, err error)",
+					"receiver": "fmt",
+					"receiver_type": "",
+					"package": "fmt"
+				},
+				{
+					"name": "show",
+					"return_type": "func()",
+					"receiver": "b",
+					"receiver_type": "testfiles.BB",
+					"package": ""
+				}
+			]
+		}
+	],
+	"var": null
+}

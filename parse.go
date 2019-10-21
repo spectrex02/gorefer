@@ -84,7 +84,7 @@ func (p *Parser) GetFunctionInfo(decl *ast.FuncDecl, obj types.Object) FunctionI
 	return FunctionInfo{
 		Id:           p.FuncId.AllocateId(),
 		FuncInfo: info,
-		Called:       nil,
+		Call:       nil,
 	}
 }
 
