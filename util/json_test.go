@@ -10,8 +10,8 @@ import (
 func TestJson(t *testing.T) {
 	testdata := analysistest.TestData()
 	r := analysistest.Run(t, testdata, linker.Analyzer, "testfiles")
-	info := r[0].Result.(gorefer.PackageInfo)
-	j := New(info)
+	info := r[0].Result.(*gorefer.PackageInfo)
+	j := New(*info)
 	data := j.ToJson()
 	WriteJsonFile(j.Name, data)
 }
