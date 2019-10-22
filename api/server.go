@@ -15,7 +15,7 @@ func Serve() {
 	})
 
 	//get package name and serve json file
-	server.GET("/result/:package", getPackage)
+	server.File("/result/:package", "/front/index.html")
 	server.GET("/result/:package/struct", getStruct)
 	server.GET("/result/:package/interface", getInterface)
 	server.GET("/result/:package/function", getFunction)

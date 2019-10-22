@@ -77,36 +77,33 @@ func FindVarFromId(list []VarInfo, id int) (interface{}, error) {
 //func ResolveUnderLayingType(pkg PackageInfo) {
 //
 //}
-type CallRelationship map[FuncId][]FuncId
-type fMap struct {
-	Name string
-	Id FuncId
-}
+type CallRelationship map[string][]string
+
 func ResolveFuncRelationship(funcList []FunctionInfo) CallRelationship {
 	relation := make(CallRelationship)
-	var fList []fMap
+	var fList []string
 	for _, f := range funcList {
-		fList = append(fList, fMap{Name:f.FuncInfo.Name, Id:f.Id})
+		fList = append(fList, f.FuncInfo.Name)
 	}
 	for _, f := range funcList {
-		var callList []FuncId
+		var callList []string
 		for _, call := range f.Call {
 			if call.Package == "" {
-				if fmap, exist := contains(fList, call.Name); exist {
-					callList = append(callList, fmap)
+				if name, exist := contains(fList, call.Name); exist {
+					callList = append(callList, name)
 				}
 			}
 		}
-		relation[f.Id] = callList
+		relation[f.FuncInfo.Name] = callList
 	}
 	return relation
 }
 
-func contains(list []fMap, want string) (FuncId, bool) {
+func contains(list []string, want string) (string, bool) {
 	for _, s := range list {
-		if s.Name == want {
-			return s.Id, true
+		if s == want {
+			return s, true
 		}
 	}
-	return FuncId{}, false
+	return "", false
 }
