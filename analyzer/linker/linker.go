@@ -5,6 +5,7 @@ import (
 	"github.com/spectrex02/gorefer"
 	"github.com/spectrex02/gorefer/analyzer/detectDecl"
 	"github.com/spectrex02/gorefer/analyzer/findcall"
+	"github.com/spectrex02/gorefer/api"
 	"github.com/spectrex02/gorefer/util"
 	"golang.org/x/tools/go/analysis"
 )
@@ -29,8 +30,8 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		f.Show()
 	}
 	resultJson := util.New(*result)
-	jsonData := resultJson.ToJson()
-	util.WriteJsonFile(result.Name, jsonData)
+	resultJson.OutputResult()
+	api.Serve()
 	return nil, nil
 }
 

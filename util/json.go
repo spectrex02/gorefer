@@ -52,7 +52,11 @@ type FJson struct {
 	Package string `json:"package"`
 }
 
-func PackageInfoToJson(info gorefer.PackageInfo) PackageJson {
+type Relation struct {
+	Call FunctionJson `json:"call"`
+	Called []FunctionJson `json:"called"`
+}
+func New(info gorefer.PackageInfo) PackageJson {
 	var sj []StructJson
 	var ij []InterfaceJson
 	var fj []FunctionJson
@@ -131,26 +135,93 @@ func FuncToJson(f gorefer.Func) FJson {
 	}
 }
 //write to the result file as json format
-func WriteJsonFile(filename string, jsonResult []byte) {
-	isExist := os.Mkdir("result", os.ModePerm)
-	if os.IsNotExist(isExist) {
-		log.Printf("Directory to store the result is not exist. Make it.")
-	}
-	filepath := "result/" + filename + ".json"
+func writeJsonFile(path string, jsonResult []byte) {
+	filepath := path + ".json"
 	err := ioutil.WriteFile(filepath, jsonResult, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func New(info gorefer.PackageInfo) PackageJson {
-	return PackageInfoToJson(info)
+//convert all package information to json file
+func (pkg *PackageJson) OutputResult() {
+	//make directory
+	path := "result/" + pkg.Name + "/"
+	makeResultDir(pkg.Name)
+	//struct
+	structData := structToJson(pkg.Struct)
+	writeJsonFile(path + "struct-list", structData)
+
+	//interface
+	interfaceData := interfaceToJson(pkg.Interface)
+	writeJsonFile(path + "interface-list", interfaceData)
+
+	//function
+	functionData := functionToJson(pkg.Function)
+	writeJsonFile(path + "function-list", functionData)
+
+	//var
+	varData := varToJson(pkg.Var)
+	writeJsonFile(path + "var-list", varData)
 }
 
-func (pkg *PackageJson) ToJson() []byte {
-	result, err := json.MarshalIndent(pkg, "", "	")
+func structToJson(list []StructJson) []byte {
+	type structList struct {
+		List []StructJson `json:"list"`
+	}
+	s := structList{List:list}
+	result, err := json.MarshalIndent(s, "", "	")
 	if err != nil {
 		panic(err)
 	}
 	return result
 }
+
+func interfaceToJson(list []InterfaceJson) []byte {
+	type interfaceList struct {
+		List []InterfaceJson `json:"list"`
+	}
+	i := interfaceList{List:list}
+	result, err := json.MarshalIndent(i, "", "	")
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+func functionToJson(list []FunctionJson) []byte {
+	type functionList struct {
+		List []FunctionJson `json:"list"`
+	}
+	f := functionList{List:list}
+	result, err := json.MarshalIndent(f, "", "	")
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+func varToJson(list []VarJson) []byte {
+	type varList struct {
+		List []VarJson `json:"list"`
+	}
+	v := varList{List:list}
+	result, err := json.MarshalIndent(v, "", "	")
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+func makeResultDir(name string) {
+	dir := "result/" + name
+	isExist := os.Mkdir("result", os.ModePerm)
+	if os.IsNotExist(isExist) {
+		log.Printf("Directory to store the result is already exist.")
+	}
+	isExist = os.Mkdir(dir, os.ModePerm)
+	if os.IsNotExist(isExist) {
+		log.Printf("Directory to store the result is already exist.")
+	}
+}
+
